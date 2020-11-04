@@ -38,7 +38,7 @@ func main() {
 }
 
 func Merge(a, b interface{}) (_ interface{}, err error) {
-	log.Info().Msgf("merge %v (%T) %v (%T)", a, a, b, b)
+	log.Debug().Msgf("merge %v (%T) %v (%T)", a, a, b, b)
 	switch typedA := a.(type) {
 	case []interface{}:
 		typedB, ok := b.([]interface{})
