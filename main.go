@@ -6,9 +6,14 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v2"
 )
+
+func init() {
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+}
 
 func main() {
 	if len(os.Args) < 2 {
