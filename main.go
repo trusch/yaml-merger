@@ -8,10 +8,16 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v2"
 )
 
+var (
+	ignoreList = pflag.StringSlice("ignore", []string{}, "keys to ignore when merging")
+)
+
 func init() {
+	pflag.Parse()
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 }
 
@@ -20,7 +26,7 @@ func main() {
 		log.Fatal().Msgf("usage: %s <file> [<file>...]", os.Args[0])
 	}
 	var res interface{}
-	for _, f := range os.Args[1:] {
+	for _, f := range pflag.Args() {
 		bs, err := ioutil.ReadFile(f)
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to read file")
@@ -57,6 +63,9 @@ func Merge(a, b interface{}) (_ interface{}, err error) {
 			return nil, errors.New("wrong type on right side")
 		}
 		for key, rightVal := range typedB {
+			if shouldIgnore(key) {
+				continue
+			}
 			leftVal, ok := typedA[key]
 			if !ok {
 				typedA[key] = rightVal
@@ -72,4 +81,17 @@ func Merge(a, b interface{}) (_ interface{}, err error) {
 		return b, nil
 	}
 	return nil, errors.New("unexpected end")
+}
+
+func shouldIgnore(key interface{}) bool {
+	str, ok := key.(string)
+	if !ok {
+		return false
+	}
+	for _, ignoreKey := range *ignoreList {
+		if str == ignoreKey {
+			return true
+		}
+	}
+	return false
 }
